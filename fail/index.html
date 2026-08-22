@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Оплата не прошла — Торт по любви</title>
+<meta name="description" content="Оплата заказа не прошла. Заказ сохранён — попробуйте ещё раз или свяжитесь с нами напрямую.">
+<meta name="robots" content="noindex, follow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300&family=Jost:wght@200;300;400;500&family=Marck+Script&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/tokens.css">
+<link rel="stylesheet" href="../assets/shop.css">
+</head>
+<body>
+
+<header class="hdr">
+  <a class="brand" href="../">
+    <span class="brand-name">Торт <em class="script">по любви</em></span>
+    <span class="brand-sub">Свадебные торты · Самара</span>
+  </a>
+</header>
+
+<main class="page">
+  <div class="wrap narrow" style="text-align:center">
+    <div style="width:64px;height:64px;margin:0 auto 26px;border-radius:50%;border:1px solid #D8B4AE;display:flex;align-items:center;justify-content:center">
+      <svg viewBox="0 0 24 24" style="width:24px;height:24px;stroke:#8C3B30;fill:none;stroke-width:1.5;stroke-linecap:round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </div>
+    <h1 class="d1">Оплата <em>не прошла</em></h1>
+    <p class="lead" style="margin:20px auto 0">Деньги не списались. Такое бывает из-за лимита банка или обрыва связи — состав заказа мы сохранили, можно попробовать ещё раз.</p>
+
+    <div class="card" style="margin:clamp(30px,4vw,46px) auto 0;max-width:440px;text-align:left">
+      <ul class="sum">
+        <li><span>Номер заказа</span><span class="rub" id="order">—</span></li>
+        <li><span>Сумма</span><span class="rub" id="amount">—</span></li>
+      </ul>
+      <p class="note" style="margin-top:16px">Назовите этот номер, если напишете нам — так найдём заявку быстрее.</p>
+    </div>
+
+    <p class="note" id="demo-note" style="margin-top:22px" hidden>Это демонстрационный сценарий: настоящая оплата не проводилась.</p>
+
+    <div style="margin-top:clamp(30px,4vw,44px);display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
+      <a class="btn btn--solid" href="../checkout/"><span>Попробовать снова
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16M14 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span></a>
+      <a class="btn btn--ghost" href="https://t.me/tort_po_lyubvi"><span>Написать в Telegram</span></a>
+    </div>
+
+    <p class="note" style="margin-top:26px">Или позвоните: <a href="tel:+79990000000" style="color:var(--rose-ink);text-decoration:underline;text-underline-offset:3px">+7 999 000-00-00</a></p>
+  </div>
+</main>
+
+<footer class="ftr">
+  <div class="wrap ftr-in">
+    <a href="../">Торт по любви · Самара</a>
+    <small>© 2026 · доставка и сборка на площадке</small>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var q = new URLSearchParams(location.search);
+  var order = q.get('order');
+  var amount = parseInt(q.get('amount'), 10);
+  if (order) document.getElementById('order').textContent = order;
+  document.getElementById('amount').textContent = isNaN(amount)
+    ? '—' : new Intl.NumberFormat('ru-RU').format(amount) + ' ₽';
+  if (order && /^DEMO-/.test(order)) document.getElementById('demo-note').hidden = false;
+  // Корзину НЕ чистим: человек вернётся и попробует оплатить тот же состав
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Оформление заказа — Торт по любви</title>
+<meta name="description" content="Оформление заказа свадебного торта: состав заказа, контакты для связи и оплата. Кондитерская «Торт по любви», Самара.">
+<link rel="canonical" href="https://strangehul1-design.github.io/asiyatort/checkout/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300&family=Jost:wght@200;300;400;500&family=Marck+Script&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/tokens.css">
+<link rel="stylesheet" href="../assets/shop.css">
+</head>
+<body>
+
+<header class="hdr">
+  <a class="brand" href="../">
+    <span class="brand-name">Торт <em class="script">по любви</em></span>
+    <span class="brand-sub">Свадебные торты · Самара</span>
+  </a>
+  <a class="back" href="../#prices">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12H4M10 6l-6 6 6 6"/></svg>
+    К ценам
+  </a>
+</header>
+
+<main class="page">
+  <div class="wrap narrow">
+    <p class="eyebrow">Шаг 1 из 2</p>
+    <h1 class="d1" style="margin:18px 0 14px">Оформление <em>заказа</em></h1>
+    <p class="lead" style="margin-bottom:clamp(30px,4vw,48px)">Проверьте состав, оставьте контакты — и мы свяжемся, чтобы подтвердить дату и детали. Оплата на следующем шаге.</p>
+
+    <!-- Пустая корзина -->
+    <div class="card" id="empty" hidden>
+      <h2 class="d3" style="margin-bottom:10px">Корзина пуста</h2>
+      <p class="note" style="margin-bottom:24px">Выберите позиции в разделе «Цены» — или опишите задумку в свободной заявке, если нужного варианта там нет.</p>
+      <a class="btn btn--solid" href="../#prices"><span>Перейти к ценам
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16M14 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span></a>
+    </div>
+
+    <!-- Заказ -->
+    <div id="order" hidden>
+      <div class="card" style="margin-bottom:clamp(20px,2.6vw,32px)">
+        <h2 class="d3" style="margin-bottom:20px">Состав заказа</h2>
+        <ul class="sum" id="lines"></ul>
+        <div class="sum">
+          <div class="total" style="display:flex;align-items:baseline;justify-content:space-between;gap:18px;padding-top:20px">
+            <span style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)">Итого к оплате</span>
+            <b class="rub" id="total" style="font-family:var(--ff-d);font-size:34px;font-weight:500">0 ₽</b>
+          </div>
+        </div>
+        <p class="note" id="server-note" style="margin-top:14px" hidden></p>
+      </div>
+
+      <form class="card" id="form" novalidate>
+        <h2 class="d3" style="margin-bottom:22px">Контакты</h2>
+        <input type="hidden" name="form_type" value="checkout">
+        <input type="text" name="company" class="trap" tabindex="-1" autocomplete="off" aria-hidden="true"
+               style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
+
+        <div class="form-grid">
+          <div class="field">
+            <label for="c-name"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>Ваше имя</label>
+            <input class="inp" type="text" id="c-name" name="name" placeholder="Как к вам обращаться" autocomplete="name" required>
+          </div>
+          <div class="field">
+            <label for="c-phone"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h4l2 5-2.5 1.5a12 12 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2.2 2A17 17 0 0 1 3 5.2 2 2 0 0 1 5 3z"/></svg>Телефон</label>
+            <input class="inp" type="tel" id="c-phone" name="phone" placeholder="+7 999 000-00-00" autocomplete="tel" required>
+          </div>
+          <div class="field f-wide">
+            <label for="c-email"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>Электронная почта</label>
+            <input class="inp" type="email" id="c-email" name="email" placeholder="Чек и подтверждение придут сюда" autocomplete="email" required>
+          </div>
+          <div class="field f-wide">
+            <span class="legend"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v12H8l-4 4z"/></svg>Как удобнее связаться</span>
+            <div class="pills">
+              <label class="pill"><input type="radio" name="channel" value="Telegram" checked><span>Telegram</span></label>
+              <label class="pill"><input type="radio" name="channel" value="WhatsApp"><span>WhatsApp</span></label>
+              <label class="pill"><input type="radio" name="channel" value="Звонок"><span>Звонок</span></label>
+              <label class="pill"><input type="radio" name="channel" value="ВКонтакте"><span>ВКонтакте</span></label>
+            </div>
+          </div>
+          <div class="field f-wide">
+            <label for="c-date"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Дата свадьбы</label>
+            <input class="inp" type="date" id="c-date" name="date">
+          </div>
+          <div class="field f-wide">
+            <label for="c-more"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16M4 12h16M4 19h10"/></svg>Комментарий к заказу</label>
+            <textarea class="inp" id="c-more" name="more" placeholder="Площадка, число гостей, пожелания по декору, аллергии."></textarea>
+          </div>
+        </div>
+
+        <div style="margin-top:30px;padding-top:26px;border-top:1px solid var(--line);display:flex;gap:20px;align-items:center;justify-content:space-between;flex-wrap:wrap">
+          <p class="note" style="max-width:42ch">Нажимая «Оплатить», вы перейдёте на защищённую страницу оплаты. Заявка придёт нам сразу.</p>
+          <button class="btn btn--solid" type="submit" id="pay"><span>Оплатить
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16M14 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span></button>
+        </div>
+
+        <div class="fail" id="fail">
+          <p class="fail-t">Не получилось перейти к оплате</p>
+          <p class="fail-p">Похоже, пропала связь. Попробуйте ещё раз или напишите нам напрямую —
+            <a href="https://t.me/tort_po_lyubvi">Telegram</a> или
+            <a href="tel:+79990000000">+7 999 000-00-00</a>.</p>
+        </div>
+      </form>
+    </div>
+  </div>
+</main>
+
+<footer class="ftr">
+  <div class="wrap ftr-in">
+    <a href="../">Торт по любви · Самара</a>
+    <small>© 2026 · доставка и сборка на площадке</small>
+  </div>
+</footer>
+
+<script src="../assets/catalog.js"></script>
+<script src="../assets/cart.js"></script>
+<script src="../assets/api.js"></script>
+<script>
+(function () {
+  'use strict';
+  var $ = function (s, c) { return (c || document).querySelector(s); };
+  var $$ = function (s, c) { return Array.prototype.slice.call((c || document).querySelectorAll(s)); };
+
+  var lines = Cart.lines();
+  if (!lines.length) { $('#empty').hidden = false; return; }
+  $('#order').hidden = false;
+
+  /* Состав заказа. Показанная сумма предварительная — итоговую
+     называет сервер при создании платежа (см. ниже). */
+  var ul = $('#lines');
+  lines.forEach(function (l) {
+    var li = document.createElement('li');
+    var left = document.createElement('span');
+    left.textContent = l.name + ' × ' + l.qty;
+    var right = document.createElement('span');
+    right.className = 'rub';
+    right.textContent = Cart.money(l.price * l.qty);
+    li.appendChild(left); li.appendChild(right);
+    ul.appendChild(li);
+  });
+  $('#total').textContent = Cart.money(Cart.subtotal());
+
+  var form = $('#form'), fail = $('#fail'), btn = $('#pay');
+  var label = btn.querySelector('span');
+  var original = label.innerHTML;
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    var bad = $$('[required]', form).filter(function (f) { return !f.value.trim(); });
+    if (bad.length) {
+      bad.forEach(function (f) {
+        f.classList.add('is-bad');
+        f.addEventListener('input', function () { f.classList.remove('is-bad'); }, { once: true });
+      });
+      bad[0].focus();
+      return;
+    }
+
+    fail.classList.remove('is-on');
+    btn.disabled = true;
+    label.textContent = 'Готовим оплату…';
+
+    var customer = {};
+    new FormData(form).forEach(function (v, k) { customer[k] = v; });
+
+    /* На сервер уходят ТОЛЬКО id и количество.
+       Ни цен, ни итоговой суммы — их сервер считает сам. */
+    var body = {
+      items: Cart.payload(),
+      customer: customer,
+      return_url: window.SITE_BASE + 'success/'
+    };
+
+    if (!window.API_BASE) {
+      // Демо без сервера: показываем платёжный экран локально.
+      var demoOrder = 'DEMO-' + Date.now().toString(36).toUpperCase();
+      var qs = '?order=' + encodeURIComponent(demoOrder) +
+               '&amount=' + encodeURIComponent(Cart.subtotal()) +
+               '&demo=local';
+      location.href = '../demo-checkout/' + qs;
+      return;
+    }
+
+    fetch(window.API_BASE + '/create-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    })
+      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+      .then(function (res) {
+        if (!res.ok || !res.d.ok || !res.d.confirmation_url) {
+          throw new Error(res.d && res.d.error ? res.d.error : 'отказ сервера');
+        }
+        // Сервер пересчитал сумму — показываем именно её, затем уходим на оплату
+        $('#total').textContent = Cart.money(res.d.amount);
+        location.href = res.d.confirmation_url;
+      })
+      .catch(function () {
+        fail.classList.add('is-on');
+        btn.disabled = false;
+        label.innerHTML = original;
+        fail.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      });
+  });
+})();
+</script>
+</body>
+</html>

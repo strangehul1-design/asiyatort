@@ -1,0 +1,144 @@
+/* ═══════════════════════════════════════════
+   Общая вёрстка для страниц корзины, оформления,
+   демо-оплаты и результата. Повторяет язык главной:
+   те же шрифты, отступы, кнопки и поля.
+   Подключать ПОСЛЕ tokens.css.
+   ═══════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+body{
+  font-family:var(--ff-b);font-weight:300;font-size:16px;line-height:1.75;
+  background:var(--ivory);color:var(--graphite);
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+  display:flex;flex-direction:column;min-height:100svh;
+}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select,textarea{font-family:inherit;font-size:inherit;color:var(--graphite)}
+a{color:inherit}
+::selection{background:var(--powder);color:var(--graphite)}
+:focus-visible{outline:2px solid var(--rose-ink);outline-offset:3px;border-radius:2px}
+
+.wrap{width:100%;max-width:1320px;margin:0 auto;padding-inline:var(--gut)}
+.page{flex:1;padding-block:clamp(112px,13vh,150px) clamp(60px,8vw,110px)}
+.narrow{max-width:760px;margin:0 auto}
+
+/* ── типографика ── */
+.d1{font-family:var(--ff-d);font-weight:300;font-size:clamp(38px,5vw,72px);line-height:1;letter-spacing:-.02em;color:var(--graphite)}
+.d2{font-family:var(--ff-d);font-weight:300;font-size:clamp(28px,3.4vw,48px);line-height:1.04;letter-spacing:-.015em;color:var(--graphite)}
+.d3{font-family:var(--ff-d);font-weight:500;font-size:clamp(20px,2.2vw,28px);line-height:1.2;color:var(--graphite)}
+.d1 em,.d2 em{font-style:italic;font-weight:300;color:var(--rose-ink)}
+.eyebrow{font-size:11px;font-weight:400;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--muted);display:flex;align-items:center;gap:12px}
+.eyebrow::before{content:"";width:26px;height:1px;background:var(--gold-ink);flex-shrink:0}
+.note{font-size:14px;line-height:1.68;color:var(--muted)}
+.lead{font-size:16.5px;line-height:1.72;color:var(--body);max-width:52ch}
+
+/* ── шапка ── */
+.hdr{
+  position:fixed;inset:0 0 auto 0;z-index:120;
+  display:flex;align-items:center;justify-content:space-between;gap:24px;
+  padding:18px var(--gut);background:rgba(251,249,245,.92);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+}
+.brand{display:flex;flex-direction:column;line-height:1;text-decoration:none}
+.brand-name{font-family:var(--ff-d);font-size:25px;font-weight:400;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--graphite);display:inline-flex;align-items:baseline;gap:.22em}
+.script{font-family:var(--ff-s);font-style:normal;font-weight:400;
+  text-transform:none;letter-spacing:0;font-size:1.34em;line-height:.8;color:var(--rose-ink)}
+.brand-sub{font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);margin-top:5px}
+.back{font-size:12.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--graphite);
+  text-decoration:none;display:inline-flex;align-items:center;gap:9px;padding:11px 4px}
+.back svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.4;
+  stroke-linecap:round;stroke-linejoin:round;transition:transform .4s var(--ease)}
+.back:hover svg{transform:translateX(-4px)}
+
+/* ── кнопки ── */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:11px;
+  font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:400;
+  padding:17px 34px;border-radius:100px;position:relative;overflow:hidden;
+  text-decoration:none;
+  transition:color .45s var(--ease),transform .35s var(--ease),box-shadow .45s var(--ease),opacity .3s;
+}
+.btn span{position:relative;z-index:2;display:inline-flex;align-items:center;gap:11px}
+.btn::before{content:"";position:absolute;inset:0;z-index:1;
+  transform:translateY(101%);transition:transform .5s var(--ease)}
+.btn:hover::before{transform:translateY(0)}
+.btn:active{transform:scale(.972)}
+.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.4;
+  transition:transform .45s var(--ease)}
+.btn:hover svg{transform:translateX(5px)}
+.btn[disabled]{opacity:.5;pointer-events:none}
+
+.btn--solid{background:var(--graphite);color:var(--ivory)}
+.btn--solid::before{background:var(--rose-ink)}
+.btn--solid:hover{box-shadow:0 12px 30px -12px rgba(145,91,74,.55)}
+.btn--ghost{border:1px solid var(--graphite);color:var(--graphite)}
+.btn--ghost::before{background:var(--graphite)}
+.btn--ghost:hover{color:var(--ivory)}
+.btn--wide{width:100%}
+
+/* ── карточка ── */
+.card{background:var(--porcelain);border:1px solid var(--line);padding:clamp(26px,3.6vw,48px)}
+
+/* ── поля ── */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(20px,2.4vw,30px)}
+.f-wide{grid-column:1/-1}
+.field{display:flex;flex-direction:column;gap:9px}
+.field>label,.legend{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);
+  display:flex;align-items:center;gap:8px}
+.field>label svg,.legend svg{width:14px;height:14px;stroke:var(--gold-ink);fill:none;
+  stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.inp{width:100%;background:transparent;border:0;border-bottom:1px solid var(--line);
+  padding:11px 2px;font-size:15.5px;font-weight:300;color:var(--graphite);
+  transition:border-color .4s var(--ease);border-radius:0}
+.inp::placeholder{color:var(--ph-ink);opacity:1}
+.inp:focus{outline:none;border-bottom-color:var(--rose-ink)}
+.inp.is-bad{border-bottom-color:#B4453A}
+textarea.inp{resize:vertical;min-height:88px;line-height:1.65}
+
+.pills{display:flex;flex-wrap:wrap;gap:8px}
+.pill{margin:0}
+.pill input{position:absolute;opacity:0;width:0;height:0}
+.pill span{display:inline-flex;align-items:center;gap:8px;cursor:pointer;
+  font-size:12.5px;letter-spacing:.06em;padding:10px 20px;border-radius:100px;
+  border:1px solid var(--line);color:var(--body);transition:all .35s var(--ease)}
+.pill span:hover{border-color:var(--powder-deep)}
+.pill input:checked+span{background:var(--shell);border-color:var(--rose-ink);color:var(--graphite)}
+.pill input:focus-visible+span{outline:2px solid var(--rose-ink);outline-offset:3px}
+
+/* ── строки итогов ── */
+.sum{list-style:none;margin:0}
+.sum li{display:flex;align-items:baseline;justify-content:space-between;gap:18px;
+  padding:13px 0;border-bottom:1px solid var(--line);font-size:15px;color:var(--body)}
+.sum li:first-child{border-top:1px solid var(--line)}
+.sum .total{border-bottom:0;padding-top:20px;font-size:16px;color:var(--graphite)}
+.sum .total b{font-family:var(--ff-d);font-size:30px;font-weight:500}
+.rub{font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* ── сообщения ── */
+.fail{display:none;margin-top:22px;padding:20px 22px;border:1px solid #D8B4AE;background:#FBF2F0}
+.fail.is-on{display:block}
+.fail-t{font-size:14.5px;color:#8C3B30;margin-bottom:8px}
+.fail-p{font-size:14px;color:var(--body);line-height:1.6}
+.fail-p a{color:var(--rose-ink);text-decoration:underline;text-underline-offset:3px}
+
+/* ── подвал ── */
+.ftr{background:var(--graphite);color:#EDE7E1;padding-block:44px 30px;margin-top:auto}
+.ftr-in{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:center}
+.ftr a{color:#EDE7E1;text-decoration:none;font-size:14.5px;transition:color .3s var(--ease)}
+.ftr a:hover{color:var(--powder)}
+.ftr small{font-size:12.5px;color:#9C948C}
+
+/* ── значок-заглушка ── */
+.glyph{width:54px;height:54px;color:var(--gold-ink);opacity:.85}
+
+@media(max-width:720px){
+  .form-grid{grid-template-columns:1fr}
+  .brand-sub{display:none}
+}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}

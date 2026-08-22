@@ -1,0 +1,9 @@
+# Индексация разрешена. Закрыты только служебные страницы,
+# которым в поиске делать нечего.
+User-agent: *
+Allow: /
+Disallow: /demo-checkout/
+Disallow: /success/
+Disallow: /fail/
+
+Sitemap: https://strangehul1-design.github.io/asiyatort/sitemap.xml

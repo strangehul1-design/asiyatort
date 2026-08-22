@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Демо-оплата заказа — Торт по любви</title>
+<!-- Служебная страница: имитация платёжного экрана. В поиске ей делать нечего. -->
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Jost:wght@200;300;400;500&family=Marck+Script&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/tokens.css">
+<link rel="stylesheet" href="../assets/shop.css">
+<style>
+/* Экран намеренно похож на внешнюю платёжную страницу: узкий,
+   отделённый от сайта, с явной плашкой «демонстрация». */
+body{background:var(--shell)}
+.pay{max-width:460px;margin:0 auto}
+.demo-flag{
+  display:flex;align-items:flex-start;gap:11px;margin-bottom:22px;
+  padding:14px 16px;border:1px dashed var(--powder-deep);background:#FBF2EE;
+  font-size:13px;line-height:1.55;color:var(--body);
+}
+.demo-flag svg{width:17px;height:17px;stroke:var(--rose-ink);fill:none;stroke-width:1.4;flex-shrink:0;margin-top:2px}
+.pay-card{background:var(--porcelain);border:1px solid var(--line);padding:clamp(24px,3.4vw,36px)}
+.pay-top{display:flex;align-items:baseline;justify-content:space-between;gap:14px;
+  padding-bottom:18px;border-bottom:1px solid var(--line);margin-bottom:22px}
+.pay-shop{font-family:var(--ff-d);font-size:20px;font-weight:500}
+.pay-order{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.pay-amount{text-align:center;margin-bottom:26px}
+.pay-amount span{display:block;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.pay-amount b{font-family:var(--ff-d);font-size:46px;font-weight:500;font-variant-numeric:tabular-nums}
+.pay-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.pay-field{display:flex;flex-direction:column;gap:7px;margin-bottom:14px}
+.pay-field label{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.pay-field input{border:1px solid var(--line);background:var(--ivory);padding:12px 13px;
+  font-size:15px;font-variant-numeric:tabular-nums;border-radius:3px;width:100%}
+.pay-field input:focus{outline:none;border-color:var(--rose-ink)}
+.pay-note{font-size:12px;color:var(--muted);text-align:center;margin-top:18px;line-height:1.6}
+.pay-alt{display:block;width:100%;text-align:center;margin-top:12px;font-size:12.5px;
+  color:var(--muted);text-decoration:underline;text-underline-offset:3px;padding:10px}
+.pay-alt:hover{color:var(--rose-ink)}
+.pay-secure{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:20px;
+  font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.pay-secure svg{width:13px;height:13px;stroke:var(--gold-ink);fill:none;stroke-width:1.5}
+</style>
+</head>
+<body>
+
+<main class="page">
+  <div class="wrap pay">
+
+    <div class="demo-flag">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16v.5" stroke-linecap="round"/></svg>
+      <span><b style="font-weight:400">Это демонстрация.</b> Настоящая оплата не проводится, деньги не списываются. Экран повторяет то, как выглядит переход на ЮKassa: реальная касса открывается на своём домене по адресу из <code>confirmation_url</code>.</span>
+    </div>
+
+    <div class="pay-card">
+      <div class="pay-top">
+        <span class="pay-shop">Торт по любви</span>
+        <span class="pay-order" id="order">—</span>
+      </div>
+
+      <div class="pay-amount">
+        <span>Сумма к оплате</span>
+        <b class="rub" id="amount">—</b>
+      </div>
+
+      <form id="pay-form">
+        <div class="pay-field">
+          <label for="card">Номер карты</label>
+          <input id="card" inputmode="numeric" placeholder="0000 0000 0000 0000" autocomplete="off">
+        </div>
+        <div class="pay-row">
+          <div class="pay-field">
+            <label for="exp">Срок</label>
+            <input id="exp" inputmode="numeric" placeholder="ММ/ГГ" autocomplete="off">
+          </div>
+          <div class="pay-field">
+            <label for="cvc">CVC</label>
+            <input id="cvc" inputmode="numeric" placeholder="000" autocomplete="off">
+          </div>
+        </div>
+
+        <button class="btn btn--solid btn--wide" type="submit" style="margin-top:8px"><span>Оплатить картой</span></button>
+      </form>
+
+      <a class="pay-alt" href="#" id="go-fail">Показать сценарий неудачной оплаты</a>
+
+      <div class="pay-secure">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+        Демонстрационный режим
+      </div>
+    </div>
+
+    <p class="pay-note">Поля не работают и никуда не отправляются — вводить настоящие данные карты не нужно и не следует.</p>
+  </div>
+</main>
+
+<script src="../assets/api.js"></script>
+<script>
+(function () {
+  'use strict';
+  var q = new URLSearchParams(location.search);
+  var order = q.get('order') || '—';
+  var amount = parseInt(q.get('amount'), 10);
+
+  document.getElementById('order').textContent = 'Заказ ' + order;
+  document.getElementById('amount').textContent = isNaN(amount)
+    ? '—'
+    : new Intl.NumberFormat('ru-RU').format(amount) + ' ₽';
+
+  function go(where) {
+    location.href = '../' + where + '/?order=' + encodeURIComponent(order) +
+                    (isNaN(amount) ? '' : '&amount=' + amount);
+  }
+
+  document.getElementById('pay-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var btn = e.target.querySelector('button');
+    btn.disabled = true;
+    btn.querySelector('span').textContent = 'Обрабатываем…';
+    // Настоящая касса здесь сама уводит на return_url после оплаты
+    setTimeout(function () { go('success'); }, 900);
+  });
+
+  document.getElementById('go-fail').addEventListener('click', function (e) {
+    e.preventDefault();
+    go('fail');
+  });
+})();
+</script>
+</body>
+</html>
