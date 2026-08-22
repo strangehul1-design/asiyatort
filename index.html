@@ -56,8 +56,7 @@
         "closes": "19:00"
       }],
       "sameAs": [
-        "https://t.me/tort_po_lyubvi",
-        "https://vk.com/tort_po_lyubvi"
+        "https://vk.ru/asiyatort"
       ]
     },
     {
@@ -94,6 +93,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@200;300;400;500&family=Marck+Script&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/vk-send.css">
 <style>
 
 /* clip, а не hidden: hidden сделал бы html контейнером прокрутки
@@ -1192,8 +1192,9 @@ select.inp{
           <div class="field">
             <span class="legend"><svg viewBox="0 0 24 24"><path d="M4 5h16v12H8l-4 4z"/></svg>Как удобнее связаться</span>
             <div class="pills">
-              <label class="pill"><input type="radio" name="channel" value="Telegram" checked><span>Telegram</span></label>
+              <label class="pill"><input type="radio" name="channel" value="ВКонтакте" checked><span>ВКонтакте</span></label>
               <label class="pill"><input type="radio" name="channel" value="WhatsApp"><span>WhatsApp</span></label>
+              <label class="pill"><input type="radio" name="channel" value="Telegram"><span>Telegram</span></label>
               <label class="pill"><input type="radio" name="channel" value="Звонок"><span>Звонок</span></label>
             </div>
           </div>
@@ -1219,7 +1220,7 @@ select.inp{
           </div>
 
           <div class="form-foot">
-            <p class="note" style="max-width:44ch">Отвечаем в течение дня. Заявка ни к чему не обязывает — эскиз и расчёт бесплатны.</p>
+            <p class="note" style="max-width:44ch">Текст заявки скопируется, и мы отправим вас в наше сообщество ВКонтакте — останется вставить и отправить. Эскиз и расчёт бесплатны.</p>
             <button class="btn btn--solid" type="submit"><span>Отправить заявку
               <svg viewBox="0 0 24 24"><path d="M4 12h16M14 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </span></button>
@@ -1228,7 +1229,7 @@ select.inp{
 
         <div class="fail" id="fail-form-order" role="alert">
           <p class="fail-t">Заявка не ушла</p>
-          <p class="fail-p">Похоже, пропала связь. Напишите нам напрямую — <a href="https://t.me/tort_po_lyubvi">Telegram</a> или <a href="tel:+79990000000">+7 999 000-00-00</a>. Или попробуйте отправить ещё раз.</p>
+          <p class="fail-p">Похоже, пропала связь. Напишите нам напрямую — <a href="https://vk.me/asiyatort">ВКонтакте</a> или <a href="tel:+79990000000">+7 999 000-00-00</a>. Или попробуйте отправить ещё раз.</p>
         </div>
 
         <div class="sent" id="sent-order" role="status">
@@ -1268,13 +1269,14 @@ select.inp{
           <div class="field f-wide">
             <span class="legend"><svg viewBox="0 0 24 24"><path d="M4 5h16v12H8l-4 4z"/></svg>Как удобнее связаться</span>
             <div class="pills">
-              <label class="pill"><input type="radio" name="channel" value="Telegram" checked><span>Telegram</span></label>
+              <label class="pill"><input type="radio" name="channel" value="ВКонтакте" checked><span>ВКонтакте</span></label>
               <label class="pill"><input type="radio" name="channel" value="WhatsApp"><span>WhatsApp</span></label>
+              <label class="pill"><input type="radio" name="channel" value="Telegram"><span>Telegram</span></label>
               <label class="pill"><input type="radio" name="channel" value="Звонок"><span>Звонок</span></label>
             </div>
           </div>
           <div class="form-foot">
-            <p class="note" style="max-width:40ch">Подтвердим время в ответном сообщении.</p>
+            <p class="note" style="max-width:40ch">Текст скопируется — отправьте его нам в сообщество ВКонтакте, подтвердим время в ответ.</p>
             <button class="btn btn--solid" type="submit"><span>Записаться
               <svg viewBox="0 0 24 24"><path d="M4 12h16M14 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </span></button>
@@ -1283,7 +1285,7 @@ select.inp{
 
         <div class="fail" id="fail-form-tasting" role="alert">
           <p class="fail-t">Заявка не ушла</p>
-          <p class="fail-p">Похоже, пропала связь. Напишите нам напрямую — <a href="https://t.me/tort_po_lyubvi">Telegram</a> или <a href="tel:+79990000000">+7 999 000-00-00</a>. Или попробуйте отправить ещё раз.</p>
+          <p class="fail-p">Похоже, пропала связь. Напишите нам напрямую — <a href="https://vk.me/asiyatort">ВКонтакте</a> или <a href="tel:+79990000000">+7 999 000-00-00</a>. Или попробуйте отправить ещё раз.</p>
         </div>
 
         <div class="sent" id="sent-tasting" role="status">
@@ -1440,8 +1442,8 @@ select.inp{
         <p class="ftr-h">Связаться</p>
         <ul class="ftr-list">
           <li><a href="tel:+79990000000"><svg viewBox="0 0 24 24"><path d="M5 3h4l2 5-2.5 1.5a12 12 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2.2 2A17 17 0 0 1 3 5.2 2 2 0 0 1 5 3z"/></svg>+7 999 000-00-00</a></li>
-          <li><a href="https://t.me/melba_cakes"><svg viewBox="0 0 24 24"><path d="M21 4 2.5 11.2l5.3 1.8L19 6.5l-8.6 8.2.3 5 2.7-3.4 4.6 3.4z"/></svg>Telegram</a></li>
-          <li><a href="https://vk.com/tort_po_lyubvi"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M7 9.5c.6 3.4 2.6 5.5 5.2 5.5V9.5m0 5.5c1.6 0 3.2-2.1 4.3-5.5"/></svg>ВКонтакте</a></li>
+          <li><a href="https://vk.me/asiyatort"><svg viewBox="0 0 24 24"><path d="M4 5h16v12H8l-4 4z"/></svg>Написать в сообщество</a></li>
+          <li><a href="https://vk.ru/asiyatort"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M7 9.5c.6 3.4 2.6 5.5 5.2 5.5V9.5m0 5.5c1.6 0 3.2-2.1 4.3-5.5"/></svg>Сообщество ВКонтакте</a></li>
           <li><a href="mailto:hello@tortpolyubvi.ru"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>hello@tortpolyubvi.ru</a></li>
         </ul>
       </div>
@@ -1466,6 +1468,7 @@ select.inp{
 <script src="assets/catalog.js"></script>
 <script src="assets/cart.js"></script>
 <script src="assets/api.js"></script>
+<script src="assets/vk-send.js"></script>
 <script>
 (function(){
 'use strict';
@@ -1735,20 +1738,16 @@ filling.addEventListener('change', ()=>{
   fillHint.hidden = !(opt && opt.dataset.tasting);
 });
 
-/* Реальный адрес формы подставьте в ENDPOINT — тогда данные уйдут на сервер.
-   Пока он пуст, показываем экран подтверждения без отправки. */
-/* Адрес воркера, который передаёт заявки в Telegram.
-   Токен бота лежит в секретах Cloudflare и на страницу не попадает —
-   иначе его увидел бы любой, кто откроет исходный код.
-   Пока строка пуста, форма работает как демонстрация: показывает
-   подтверждение, никуда не отправляя. */
+/* Заявка уходит через ВКонтакте: собираем текст, кладём в буфер,
+   показываем окно и уводим в личку сообщества. Если задан ENDPOINT,
+   параллельно тихо отправляем на сервер — тогда заявка придёт и сама. */
 const ENDPOINT = '';
 
-function wireForm(formId, sentId, failId){
-  const form = $(formId), sent = $(sentId), fail = $(failId);
+function wireForm(formId, kind, failId){
+  const form = $(formId), fail = $(failId);
   const btn  = $('button[type="submit"]', form);
   const btnLabel = btn.querySelector('span');
-  const original = btnLabel ? btnLabel.innerHTML : btn.innerHTML;
+  const original = btnLabel ? btnLabel.innerHTML : '';
 
   form.addEventListener('submit', async e=>{
     e.preventDefault();
@@ -1764,37 +1763,20 @@ function wireForm(formId, sentId, failId){
     }
 
     fail.classList.remove('is-on');
-    btn.disabled = true;
-    btn.style.opacity = '.55';
-    if(btnLabel) btnLabel.textContent = 'Отправляем…';
+    const text = VKSend.buildText(form, kind);
 
-    // Демонстрационный режим: адрес не задан
-    if(!ENDPOINT){
-      form.style.display = 'none';
-      sent.classList.add('is-on');
-      return;
+    // Если сервер настроен — пробуем и его, но человека не задерживаем
+    if(ENDPOINT){
+      fetch(ENDPOINT + '/submit', {method:'POST', body:new FormData(form)}).catch(()=>{});
     }
 
-    try{
-      const res = await fetch(ENDPOINT, {method:'POST', body:new FormData(form)});
-      if(!res.ok) throw new Error('HTTP ' + res.status);
-      const data = await res.json().catch(()=>({ok:true}));
-      if(data.ok === false) throw new Error(data.error || 'отказ сервера');
-
-      form.style.display = 'none';
-      sent.classList.add('is-on');
-    }catch(err){
-      // Заявка не дошла — говорим об этом, а не рисуем ложное «отправлено»
-      fail.classList.add('is-on');
-      btn.disabled = false;
-      btn.style.opacity = '';
-      if(btnLabel) btnLabel.innerHTML = original;
-      fail.scrollIntoView({block:'nearest', behavior: RM ? 'auto' : 'smooth'});
-    }
+    VKSend.open(text);
+    if(btnLabel) btnLabel.innerHTML = original;
   });
 }
-wireForm('#form-order',   '#sent-order',   '#fail-form-order');
-wireForm('#form-tasting', '#sent-tasting', '#fail-form-tasting');
+wireForm('#form-order',   'order',   '#fail-form-order');
+wireForm('#form-tasting', 'tasting', '#fail-form-tasting');
+
 
 /* ─────────────────────────────────────────
    8. АНИМАЦИИ ПРОКРУТКИ И КНОПОК

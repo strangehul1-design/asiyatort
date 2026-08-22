@@ -11,6 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300&family=Jost:wght@200;300;400;500&family=Marck+Script&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/tokens.css">
 <link rel="stylesheet" href="../assets/shop.css">
+<link rel="stylesheet" href="../assets/vk-send.css">
 </head>
 <body>
 
@@ -76,10 +77,10 @@
           <div class="field f-wide">
             <span class="legend"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v12H8l-4 4z"/></svg>Как удобнее связаться</span>
             <div class="pills">
-              <label class="pill"><input type="radio" name="channel" value="Telegram" checked><span>Telegram</span></label>
+              <label class="pill"><input type="radio" name="channel" value="ВКонтакте" checked><span>ВКонтакте</span></label>
               <label class="pill"><input type="radio" name="channel" value="WhatsApp"><span>WhatsApp</span></label>
               <label class="pill"><input type="radio" name="channel" value="Звонок"><span>Звонок</span></label>
-              <label class="pill"><input type="radio" name="channel" value="ВКонтакте"><span>ВКонтакте</span></label>
+              <label class="pill"><input type="radio" name="channel" value="Telegram"><span>Telegram</span></label>
             </div>
           </div>
           <div class="field f-wide">
@@ -93,16 +94,19 @@
         </div>
 
         <div style="margin-top:30px;padding-top:26px;border-top:1px solid var(--line);display:flex;gap:20px;align-items:center;justify-content:space-between;flex-wrap:wrap">
-          <p class="note" style="max-width:42ch">Нажимая «Оплатить», вы перейдёте на защищённую страницу оплаты. Заявка придёт нам сразу.</p>
-          <button class="btn btn--solid" type="submit" id="pay"><span>Оплатить
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16M14 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </span></button>
+          <p class="note" style="max-width:42ch">Можно оплатить сразу или отправить заявку в наше сообщество ВКонтакте — тогда обсудим детали и оплату в переписке.</p>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <button class="btn btn--ghost" type="button" id="send-vk"><span>Отправить заявку в ВК</span></button>
+            <button class="btn btn--solid" type="submit" id="pay"><span>Оплатить
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16M14 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span></button>
+          </div>
         </div>
 
         <div class="fail" id="fail">
           <p class="fail-t">Не получилось перейти к оплате</p>
           <p class="fail-p">Похоже, пропала связь. Попробуйте ещё раз или напишите нам напрямую —
-            <a href="https://t.me/tort_po_lyubvi">Telegram</a> или
+            <a href="https://vk.me/asiyatort">ВКонтакте</a> или
             <a href="tel:+79990000000">+7 999 000-00-00</a>.</p>
         </div>
       </form>
@@ -120,6 +124,7 @@
 <script src="../assets/catalog.js"></script>
 <script src="../assets/cart.js"></script>
 <script src="../assets/api.js"></script>
+<script src="../assets/vk-send.js"></script>
 <script>
 (function () {
   'use strict';
@@ -148,6 +153,24 @@
   var form = $('#form'), fail = $('#fail'), btn = $('#pay');
   var label = btn.querySelector('span');
   var original = label.innerHTML;
+
+  /* Отправка заявки в ВКонтакте: тот же состав заказа, но без оплаты */
+  $('#send-vk').addEventListener('click', function () {
+    var bad = $$('[required]', form).filter(function (f) { return !f.value.trim(); });
+    if (bad.length) {
+      bad.forEach(function (f) {
+        f.classList.add('is-bad');
+        f.addEventListener('input', function () { f.classList.remove('is-bad'); }, { once: true });
+      });
+      bad[0].focus();
+      return;
+    }
+    var rows = lines.map(function (l) {
+      return ['Позиция', l.name + ' × ' + l.qty + ' — ' + Cart.money(l.price * l.qty)];
+    });
+    rows.push(['Итого', Cart.money(Cart.subtotal())]);
+    VKSend.open(VKSend.buildText(form, 'checkout', rows));
+  });
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();

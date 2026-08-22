@@ -1,0 +1,65 @@
+/* ═══════════════════════════════════════════
+   Окно «текст скопирован, отправьте нам в ВК».
+   Подключается вместе с tokens.css.
+   ═══════════════════════════════════════════ */
+.vk-veil{
+  position:fixed;inset:0;z-index:300;
+  background:rgba(46,42,39,.5);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  opacity:0;visibility:hidden;transition:opacity .35s var(--ease),visibility .35s;
+}
+.vk-veil.is-on{opacity:1;visibility:visible}
+
+.vk-box{
+  background:var(--ivory);border:1px solid var(--line);
+  width:min(520px,100%);max-height:88svh;overflow-y:auto;
+  padding:clamp(26px,4vw,40px);position:relative;
+  transform:translateY(16px) scale(.98);
+  transition:transform .4s var(--ease);
+  box-shadow:0 30px 80px rgba(46,42,39,.22);
+}
+.vk-veil.is-on .vk-box{transform:none}
+
+.vk-x{position:absolute;top:14px;right:14px;width:38px;height:38px;
+  display:flex;align-items:center;justify-content:center;opacity:.6;transition:opacity .3s}
+.vk-x:hover{opacity:1}
+.vk-x svg{width:17px;height:17px;stroke:var(--graphite);fill:none;stroke-width:1.4;stroke-linecap:round}
+
+.vk-ic{width:52px;height:52px;margin-bottom:18px;border-radius:50%;
+  border:1px solid var(--powder-deep);display:flex;align-items:center;justify-content:center}
+.vk-ic svg{width:22px;height:22px;stroke:var(--rose-ink);fill:none;stroke-width:1.5;
+  stroke-linecap:round;stroke-linejoin:round}
+
+.vk-title{font-family:var(--ff-d);font-weight:500;font-size:clamp(22px,2.6vw,30px);
+  line-height:1.18;color:var(--graphite);margin-bottom:12px}
+.vk-lead{font-size:15px;line-height:1.65;color:var(--body);margin-bottom:20px}
+
+.vk-copied{display:inline-flex;align-items:center;gap:8px;margin-bottom:16px;
+  font-size:12px;letter-spacing:.1em;text-transform:uppercase;
+  padding:7px 14px;border-radius:100px;border:1px solid var(--champagne);
+  background:var(--shell);color:var(--rose-ink)}
+.vk-copied svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;
+  stroke-linecap:round;stroke-linejoin:round}
+.vk-copied.is-warn{border-color:#D8B4AE;background:#FBF2F0;color:#8C3B30}
+
+.vk-text{
+  background:var(--porcelain);border:1px solid var(--line);
+  padding:16px 18px;font-size:13.5px;line-height:1.62;color:var(--body);
+  white-space:pre-wrap;word-break:break-word;
+  max-height:210px;overflow-y:auto;margin-bottom:20px;
+  font-family:var(--ff-b);
+}
+
+.vk-actions{display:flex;gap:12px;flex-wrap:wrap}
+.vk-actions .btn{flex:1 1 auto}
+.vk-count{font-size:12.5px;color:var(--muted);margin-top:16px;text-align:center}
+.vk-count b{color:var(--rose-ink);font-weight:400}
+
+@media(max-width:520px){
+  .vk-actions{flex-direction:column}
+  .vk-actions .btn{width:100%}
+}
+@media(prefers-reduced-motion:reduce){
+  .vk-veil,.vk-box{transition:none}
+}
