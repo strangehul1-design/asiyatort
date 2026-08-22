@@ -1,0 +1,13 @@
+name = "tort-po-lyubvi-zayavki"
+main = "worker.js"
+compatibility_date = "2026-08-01"
+
+[vars]
+# Домены, с которых принимаются заявки. Чужой сайт слать не сможет.
+# Добавьте сюда свой домен, когда он появится.
+ALLOWED_ORIGINS = "https://strangehul1-design.github.io"
+
+# TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID сюда НЕ пишутся.
+# Это секреты, они задаются командой:
+#   wrangler secret put TELEGRAM_BOT_TOKEN
+#   wrangler secret put TELEGRAM_CHAT_ID
