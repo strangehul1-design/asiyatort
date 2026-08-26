@@ -14,6 +14,7 @@ const http = require('http');
 const PORT = Number(process.argv[2] || 8787);
 let mode = 'ok';
 const inbox = [];
+const files = {};        // путь -> содержимое, как у Telegram
 
 function readBody(req) {
   return new Promise(resolve => {
@@ -61,9 +62,25 @@ http.createServer(async (req, res) => {
   if (url.pathname === '/_inbox') {
     return send(200, { count: inbox.length, messages: inbox });
   }
+  // Положить «файл», который потом попросит бот
+  if (url.pathname === '/_putfile') {
+    const id = url.searchParams.get('id') || 'test';
+    const body = await readBody(req);
+    files['photos/' + id + '.jpg'] = body;
+    return send(200, { ok: true, bytes: body.length });
+  }
   if (url.pathname === '/_reset') {
     inbox.length = 0;
     return send(200, { ok: true });
+  }
+
+  // Выдача файла: /file/bot<токен>/<путь>
+  const fm = /^\/file\/bot[^/]+\/(.+)$/.exec(url.pathname);
+  if (fm) {
+    const f = files[decodeURIComponent(fm[1])];
+    if (!f) { res.writeHead(404); return res.end('нет файла'); }
+    res.writeHead(200, { 'Content-Type': 'image/jpeg' });
+    return res.end(f);
   }
 
   // /bot<токен>/<метод>
@@ -72,7 +89,20 @@ http.createServer(async (req, res) => {
 
   const method = m[2];
   const buf = await readBody(req);
-  const fields = parseMultipart(buf, req.headers['content-type']);
+  const ctype = req.headers['content-type'] || '';
+  // Бот шлёт JSON, сайт — multipart с файлами: понимаем оба
+  let fields;
+  if (/application\/json/i.test(ctype)) {
+    try { fields = JSON.parse(buf.toString('utf8')); } catch { fields = {}; }
+  } else {
+    fields = parseMultipart(buf, ctype);
+  }
+
+  // Бот сначала спрашивает путь к файлу, потом качает его
+  if (method === 'getFile') {
+    const id = String(fields.file_id || '');
+    return send(200, { ok: true, result: { file_id: id, file_path: 'photos/' + id + '.jpg' } });
+  }
 
   if (mode === 'fail') {
     return send(500, { ok: false, description: 'тестовый сбой Telegram' });
@@ -81,6 +111,7 @@ http.createServer(async (req, res) => {
   inbox.push({
     method,
     chat_id: fields.chat_id,
+    reply_markup: fields.reply_markup || null,
     parse_mode: fields.parse_mode,
     text: fields.text,
     caption: fields.caption,

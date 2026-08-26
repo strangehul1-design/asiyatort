@@ -12,9 +12,11 @@
    через `wrangler secret put`, см. README-deploy.md.
    ═══════════════════════════════════════════ */
 
-import { CATALOG, priceCart } from './catalog.js';
+import { CATALOG, priceCart, effectiveCatalog } from './catalog.js';
 import { notifyAll, now } from './notify.js';
 import * as store from './store.js';
+import * as content from './content.js';
+import { handleUpdate } from './bot.js';
 
 const MAX_FILES = 6;
 const MAX_FILE_BYTES = 9 * 1024 * 1024;   // Telegram sendPhoto не берёт больше 10 МБ
@@ -239,7 +241,10 @@ async function handleCreatePayment(request, env, headers) {
      были поля price или amount, они игнорируются. */
   let priced;
   try {
-    priced = priceCart(body.items);
+    // Цены берём с учётом правок из бота: на карточке и при оплате
+    // сумма обязана совпадать.
+    const overrides = await content.getAll(env);
+    priced = priceCart(body.items, overrides);
   } catch (e) {
     return json({ ok: false, error: e.message }, 400, headers);
   }
@@ -420,7 +425,31 @@ export default {
 
     // Цены, по которым считает сервер — чтобы сверить с сайтом
     if (path === '/catalog' && request.method === 'GET') {
-      return json({ ok: true, catalog: CATALOG }, 200, headers);
+      const overrides = await content.getAll(env);
+      return json({ ok: true, catalog: effectiveCatalog(overrides) }, 200, headers);
+    }
+
+    /* Правки содержимого — сайт забирает их при загрузке.
+       Отдаём всем: это то же, что видно на самой странице. */
+    if (path === '/content' && request.method === 'GET') {
+      const data = await content.getAll(env);
+      return new Response(JSON.stringify({ ok: true, content: data }), {
+        status: 200,
+        headers: { ...headers, 'Content-Type': 'application/json; charset=utf-8',
+                   'Cache-Control': 'public, max-age=30' },
+      });
+    }
+
+    // Фотографии, загруженные через бота
+    if (path.startsWith('/media/') && request.method === 'GET') {
+      const key = decodeURIComponent(path.slice('/media/'.length));
+      const pic = await content.getPhoto(env, key);
+      if (!pic) return new Response('Not found', { status: 404, headers });
+      return new Response(pic.bytes, {
+        status: 200,
+        headers: { ...headers, 'Content-Type': pic.type,
+                   'Cache-Control': 'public, max-age=300' },
+      });
     }
 
     // Заявки: недоставленные и все. Только для владельца, по ключу.
@@ -429,6 +458,21 @@ export default {
     }
     if (path === '/requests' && request.method === 'GET') {
       return handleList(request, env, headers, false);
+    }
+
+    /* Бот-редактор. Telegram шлёт сюда события; свой секрет он кладёт
+       в заголовок, по нему и проверяем, что это действительно Telegram. */
+    if (path === '/telegram-webhook') {
+      if (request.method !== 'POST') return new Response('ok');
+      const given = request.headers.get('X-Telegram-Bot-Api-Secret-Token') || '';
+      if (!env.TELEGRAM_WEBHOOK_SECRET || given !== env.TELEGRAM_WEBHOOK_SECRET) {
+        return new Response('Not found', { status: 404 });
+      }
+      let update;
+      try { update = await request.json(); } catch { return new Response('ok'); }
+      // Telegram повторяет событие, если не ответить быстро, — отвечаем сразу
+      try { await handleUpdate(env, update); } catch (e) { console.log('bot:', e); }
+      return new Response('ok');
     }
 
     // Вебхук кассы приходит с серверов ЮKassa, Origin у него нет

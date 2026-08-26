@@ -24,12 +24,36 @@ export const MAX_QTY = 99;
 export const MAX_LINES = 20;
 
 /**
+ * Каталог с учётом правок, сделанных владельцем через бота.
+ * Правка цены обязана влиять и на оплату — иначе человек увидел бы
+ * на карточке одну сумму, а списалась бы другая.
+ *
+ * @param {Object} overrides — содержимое из хранилища (ключи price.<id>.*)
+ */
+export function effectiveCatalog(overrides) {
+  if (!overrides) return CATALOG;
+  const out = {};
+  for (const [id, item] of Object.entries(CATALOG)) {
+    const name = overrides[`price.${id}.name`];
+    const raw = overrides[`price.${id}.value`];
+    const price = Number(raw);
+    out[id] = {
+      name: typeof name === 'string' && name.trim() ? name.trim() : item.name,
+      // на цену полагаемся только если она разобралась в целое число
+      price: Number.isFinite(price) && price >= 0 ? Math.round(price) : item.price,
+    };
+  }
+  return out;
+}
+
+/**
  * Пересчитывает корзину по серверным ценам.
  * @param {Array<{id:string, qty:number}>} items — то, что прислал браузер
  * @returns {{lines:Array, amount:number}} — состав и сумма в рублях
  * @throws если корзина пуста, слишком длинная или содержит чужой id
  */
-export function priceCart(items) {
+export function priceCart(items, overrides) {
+  const catalog = effectiveCatalog(overrides);
   if (!Array.isArray(items) || items.length === 0) {
     throw new Error('Корзина пуста');
   }
@@ -40,7 +64,7 @@ export function priceCart(items) {
   const merged = new Map();
   for (const raw of items) {
     const id = raw && typeof raw.id === 'string' ? raw.id : null;
-    if (!id || !CATALOG[id]) {
+    if (!id || !catalog[id]) {
       throw new Error('Неизвестная позиция: ' + String(id));
     }
     const qty = Number(raw.qty);
@@ -53,7 +77,7 @@ export function priceCart(items) {
   const lines = [];
   let amount = 0;
   for (const [id, qty] of merged) {
-    const p = CATALOG[id];              // цена ТОЛЬКО отсюда, не из запроса
+    const p = catalog[id];              // цена ТОЛЬКО отсюда, не из запроса
     const sum = p.price * qty;
     amount += sum;
     lines.push({ id, name: p.name, price: p.price, qty, sum });
