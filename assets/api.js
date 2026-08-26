@@ -9,7 +9,7 @@
    После `wrangler deploy` впишите сюда выданный адрес:
    window.API_BASE = 'https://tort-po-lyubvi-api.ВАШ.workers.dev';
    ═══════════════════════════════════════════ */
-window.API_BASE = '';
+window.API_BASE = 'https://tort-po-lyubvi-api.asiyatort.workers.dev';
 
 /** Куда возвращается человек после оплаты. Абсолютный адрес нужен ЮKassa. */
 window.SITE_BASE = location.origin + location.pathname.replace(/\/[^\/]*$/, '/').replace(/\/(checkout|demo-checkout|success|fail)\/$/, '/');
