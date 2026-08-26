@@ -4,11 +4,13 @@
  * Управление кнопками, команд запоминать не нужно. Отправьте /start — и дальше
  * по меню: раздел → что менять → прислать новое значение.
  *
- * Доступ только у владельца: сравниваем chat id с TELEGRAM_CHAT_ID.
- * Чужой, нашедший бота, не увидит ни меню, ни данных.
+ * Доступ у тех, чьи чаты перечислены в TELEGRAM_CHAT_ID (через запятую).
+ * Им же приходят заявки с сайта. Посторонний, нашедший бота, не увидит
+ * ни меню, ни данных.
  */
 
 import * as content from './content.js';
+import { recipients } from './notify.js';
 
 const STATE = 'bot:state:';
 const STATE_TTL = 60 * 60;                  // час на одну правку
@@ -227,16 +229,21 @@ function validate(field, raw) {
    Точка входа: разбор события от Telegram
    ═══════════════════════════════════════════ */
 export async function handleUpdate(env, update) {
-  const owner = String(env.TELEGRAM_CHAT_ID || '');
+  // Доступ у всех, кто перечислен в TELEGRAM_CHAT_ID
+  const allowed = recipients(env);
   const msg = update.message;
   const cq = update.callback_query;
   const chat = String(msg?.chat?.id ?? cq?.message?.chat?.id ?? '');
 
   if (!chat) return;
 
-  // Бот отвечает только владельцу
-  if (!owner || chat !== owner) {
-    if (msg) await send(env, chat, 'Этот бот принимает заявки только для владельца сайта.');
+  // Бот отвечает только своим
+  if (!allowed.length || allowed.indexOf(chat) === -1) {
+    if (msg) {
+      await send(env, chat,
+        'Этот бот служебный — он принимает заявки с сайта.\n\n' +
+        'Если вы хотите заказать торт, напишите нам: https://vk.me/asiyatort');
+    }
     return;
   }
 

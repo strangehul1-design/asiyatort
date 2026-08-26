@@ -130,9 +130,22 @@ async function handleSubmit(request, env, headers) {
     rows.push(['Декор', 'референса нет — обсудить индивидуально']);
   }
 
-  const files = form.getAll('refs')
+  /* Файл из формы — поток, и отдаётся он ровно один раз. Дальше его
+     ждут двое: хранилище и отправка в Telegram, а получателей может
+     быть несколько. Поэтому вычитываем содержимое здесь, один раз,
+     и передаём всем уже готовые байты. */
+  const incoming = form.getAll('refs')
     .filter(f => f && typeof f === 'object' && f.size > 0 && f.size <= MAX_FILE_BYTES)
     .slice(0, MAX_FILES);
+
+  const files = [];
+  for (const f of incoming) {
+    try {
+      files.push({ name: f.name, type: f.type || 'image/jpeg', size: f.size, bytes: await f.arrayBuffer() });
+    } catch {
+      /* нечитаемое вложение пропускаем — текст заявки важнее */
+    }
+  }
   if (files.length) rows.push(['Референсы', `${files.length} шт. — ниже`]);
 
   const letter = {

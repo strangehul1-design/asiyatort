@@ -41,14 +41,18 @@ export function newId() {
 export async function save(env, id, record, files) {
   if (!ready(env)) return false;
 
+  /* Сюда приходят уже вычитанные вложения: { name, type, size, bytes }.
+     Читать поток здесь нельзя — его ждёт ещё и отправка в Telegram. */
   const photos = [];
   let budget = MAX_PHOTO_BYTES;
   for (const f of files || []) {
-    if (f.size > budget) { photos.push({ name: f.name, size: f.size, saved: false }); continue; }
+    if (!f || !f.bytes || f.size > budget) {
+      photos.push({ name: f?.name || 'вложение', size: f?.size || 0, saved: false });
+      continue;
+    }
     try {
-      const buf = await f.arrayBuffer();
       let bin = '';
-      const bytes = new Uint8Array(buf);
+      const bytes = new Uint8Array(f.bytes);
       for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
       photos.push({ name: f.name, size: f.size, saved: true, type: f.type || 'image/jpeg', data: btoa(bin) });
       budget -= f.size;
@@ -146,7 +150,7 @@ export async function listAll(env, limit = 200) {
   return out;
 }
 
-/** Восстанавливает сохранённые фото в объекты File для повторной отправки. */
+/** Разворачивает сохранённые фото обратно в готовые байты для повторной отправки. */
 export function photosToFiles(record) {
   const out = [];
   for (const p of record.photos || []) {
@@ -155,7 +159,7 @@ export function photosToFiles(record) {
       const bin = atob(p.data);
       const bytes = new Uint8Array(bin.length);
       for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-      out.push(new File([bytes], p.name, { type: p.type || 'image/jpeg' }));
+      out.push({ name: p.name, type: p.type || 'image/jpeg', size: bytes.length, bytes: bytes.buffer });
     } catch {
       /* битое вложение пропускаем, текст всё равно уйдёт */
     }

@@ -15,6 +15,7 @@ const PORT = Number(process.argv[2] || 8787);
 let mode = 'ok';
 const inbox = [];
 const files = {};        // путь -> содержимое, как у Telegram
+let blockedChat = null;  // чат, который «заблокировал» бота
 
 function readBody(req) {
   return new Promise(resolve => {
@@ -69,6 +70,10 @@ http.createServer(async (req, res) => {
     files['photos/' + id + '.jpg'] = body;
     return send(200, { ok: true, bytes: body.length });
   }
+  if (url.pathname === '/_block') {
+    blockedChat = url.searchParams.get('chat') || null;
+    return send(200, { blockedChat });
+  }
   if (url.pathname === '/_reset') {
     inbox.length = 0;
     return send(200, { ok: true });
@@ -106,6 +111,12 @@ http.createServer(async (req, res) => {
 
   if (mode === 'fail') {
     return send(500, { ok: false, description: 'тестовый сбой Telegram' });
+  }
+
+  /* Отказ только одному чату — так ведёт себя Telegram, когда человек
+     заблокировал бота. Остальные получатели должны получить сообщение. */
+  if (blockedChat && String(fields.chat_id) === blockedChat) {
+    return send(403, { ok: false, description: 'bot was blocked by the user' });
   }
 
   inbox.push({

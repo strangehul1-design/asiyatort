@@ -66,7 +66,7 @@ async function lastText() {
   await reset();
   await message('/start', STRANGER);
   let t = await lastText();
-  check('чужому отказано', /только для владельца/i.test(t), t);
+  check('чужому отказано', /служебный/i.test(t) && /vk\.me/.test(t), t);
   check('меню чужому не показано', !/Редактор сайта/.test(t), t);
 
   console.log('\n═══ 2. Без секрета Telegram-хук не отвечает ═══');

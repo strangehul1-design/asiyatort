@@ -23,8 +23,23 @@ const escHtml = s => String(s)
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 /* ── Telegram ── */
+/**
+ * Кому уходят заявки.
+ *
+ * В TELEGRAM_CHAT_ID можно перечислить несколько чатов через запятую —
+ * тогда заявку получат все. Так подключают напарника или менеджера,
+ * не заводя второго бота.
+ */
+export function recipients(env) {
+  return String(env.TELEGRAM_CHAT_ID || '')
+    .split(/[,;\s]+/)
+    .map(s => s.trim())
+    .filter(Boolean);
+}
+
 async function sendTelegram(env, text, files) {
-  if (!env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_CHAT_ID) return { skipped: 'telegram' };
+  const chats = recipients(env);
+  if (!env.TELEGRAM_BOT_TOKEN || !chats.length) return { skipped: 'telegram' };
 
   /* Адрес API вынесен в переменную, чтобы сквозной тест мог направить
      запросы на локальную заглушку. В бою переменная не задана и
@@ -32,32 +47,55 @@ async function sendTelegram(env, text, files) {
   const host = (env.TELEGRAM_API_BASE || 'https://api.telegram.org').replace(/\/+$/, '');
   const api = m => `${host}/bot${env.TELEGRAM_BOT_TOKEN}/${m}`;
 
-  const msg = new FormData();
-  msg.append('chat_id', env.TELEGRAM_CHAT_ID);
-  msg.append('parse_mode', 'HTML');
-  msg.append('disable_web_page_preview', 'true');
-  msg.append('text', text.slice(0, 4000));
+  /* Вложения приходят уже вычитанными: { name, type, bytes }. Читать
+     поток здесь нельзя — его успело прочитать хранилище, а получателей
+     может быть несколько, и каждому нужна своя копия. */
+  const payloads = (files || []).filter(f => f && f.bytes);
 
-  const res = await fetch(api('sendMessage'), { method: 'POST', body: msg });
-  const data = await res.json().catch(() => ({}));
-  if (!data.ok) throw new Error('telegram: ' + (data.description || res.status));
+  /** Одному получателю: сначала текст, следом фотографии. */
+  async function deliverTo(chat) {
+    const msg = new FormData();
+    msg.append('chat_id', chat);
+    msg.append('parse_mode', 'HTML');
+    msg.append('disable_web_page_preview', 'true');
+    msg.append('text', text.slice(0, 4000));
 
-  for (const file of files || []) {
-    const photo = new FormData();
-    photo.append('chat_id', env.TELEGRAM_CHAT_ID);
-    photo.append('caption', `Референс: ${file.name}`.slice(0, 1000));
-    photo.append('photo', file, file.name);
-    const r = await fetch(api('sendPhoto'), { method: 'POST', body: photo });
-    const d = await r.json().catch(() => ({}));
-    if (!d.ok) {
-      const doc = new FormData();
-      doc.append('chat_id', env.TELEGRAM_CHAT_ID);
-      doc.append('caption', `Референс: ${file.name}`.slice(0, 1000));
-      doc.append('document', file, file.name);
-      await fetch(api('sendDocument'), { method: 'POST', body: doc });
+    const res = await fetch(api('sendMessage'), { method: 'POST', body: msg });
+    const data = await res.json().catch(() => ({}));
+    if (!data.ok) throw new Error(`чат ${chat}: ${data.description || res.status}`);
+
+    for (const f of payloads) {
+      // Blob, а не File: в среде воркера File ведёт себя непредсказуемо.
+      // Имя файла передаём третьим доводом в append — этого достаточно.
+      const copy = () => new Blob([f.bytes], { type: f.type });
+      const photo = new FormData();
+      photo.append('chat_id', chat);
+      photo.append('caption', `Референс: ${f.name}`.slice(0, 1000));
+      photo.append('photo', copy(), f.name);
+      const r = await fetch(api('sendPhoto'), { method: 'POST', body: photo });
+      const d = await r.json().catch(() => ({}));
+      if (!d.ok) {
+        const doc = new FormData();
+        doc.append('chat_id', chat);
+        doc.append('caption', `Референс: ${f.name}`.slice(0, 1000));
+        doc.append('document', copy(), f.name);
+        await fetch(api('sendDocument'), { method: 'POST', body: doc });
+      }
     }
   }
-  return { ok: 'telegram' };
+
+  /* Шлём всем. Один получатель мог заблокировать бота или удалить чат —
+     это не повод терять заявку для остальных. Считаем доставленным,
+     если принял хотя бы один. */
+  const results = await Promise.allSettled(chats.map(deliverTo));
+  const failed = results
+    .map((r, i) => (r.status === 'rejected' ? `${chats[i]}: ${r.reason?.message || r.reason}` : null))
+    .filter(Boolean);
+
+  if (failed.length === chats.length) {
+    throw new Error('telegram: ' + failed.join('; '));
+  }
+  return { ok: 'telegram', failedChats: failed };
 }
 
 /* ── ВКонтакте ──

@@ -12,7 +12,9 @@ ALLOWED_ORIGINS = "https://strangehul1-design.github.io"
 # Все ключи задаются командой `wrangler secret put ИМЯ`:
 #
 #   TELEGRAM_BOT_TOKEN    токен от @BotFather
-#   TELEGRAM_CHAT_ID      куда слать заявки в Telegram
+#   TELEGRAM_CHAT_ID      куда слать заявки. Можно несколько чатов через
+#                        запятую: заявку получат все, и все получат доступ
+#                        к редактору сайта
 #   VK_TOKEN              ключ доступа сообщества ВК (права: messages)
 #   VK_PEER_ID            куда слать в ВК: ваш id или 2000000000+id беседы
 #   VK_CONFIRMATION       строка подтверждения из настроек Callback API
