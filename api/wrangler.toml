@@ -31,4 +31,4 @@ ALLOWED_ORIGINS = "https://strangehul1-design.github.io"
 # Команда напечатает id — впишите его ниже вместо ЗАМЕНИТЕ_НА_ID
 [[kv_namespaces]]
 binding = "REQUESTS"
-id = "ЗАМЕНИТЕ_НА_ID"
+id = "847ce293669845f4aa5b37a2c4d0448b"
