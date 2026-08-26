@@ -19,4 +19,16 @@ ALLOWED_ORIGINS = "https://strangehul1-design.github.io"
 #   VK_SECRET             секретный ключ Callback API
 #   YOOKASSA_SHOP_ID      появится после регистрации магазина
 #   YOOKASSA_SECRET_KEY   там же; пока не задан — работает демо-оплата
+#   ADMIN_KEY             ваш пароль для просмотра заявок: /pending?key=...
 # ─────────────────────────────────────────────────────────────
+
+# ── Хранилище заявок ──
+# Сюда падает каждая заявка ДО отправки в Telegram. Если Telegram не ответил,
+# телефон клиента всё равно сохранён, и заявку видно по адресу /pending
+#
+# Создать одной командой (выполнить в этой папке):
+#   wrangler kv namespace create REQUESTS
+# Команда напечатает id — впишите его ниже вместо ЗАМЕНИТЕ_НА_ID
+[[kv_namespaces]]
+binding = "REQUESTS"
+id = "ЗАМЕНИТЕ_НА_ID"

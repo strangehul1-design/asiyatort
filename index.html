@@ -1738,16 +1738,32 @@ filling.addEventListener('change', ()=>{
   fillHint.hidden = !(opt && opt.dataset.tasting);
 });
 
-/* Заявка уходит через ВКонтакте: собираем текст, кладём в буфер,
-   показываем окно и уводим в личку сообщества. Если задан ENDPOINT,
-   параллельно тихо отправляем на сервер — тогда заявка придёт и сама. */
-const ENDPOINT = '';
+/* Отправка заявки.
 
-function wireForm(formId, kind, failId){
-  const form = $(formId), fail = $(failId);
+   По порядку:
+   1. Пробуем сервер — заявка уходит в Telegram сама, клиенту ничего
+      делать не нужно. Адрес сервера берётся из assets/api.js.
+   2. Сервер не ответил или не настроен — показываем окно с текстом
+      и уводим в сообщество ВКонтакте, чтобы заявка всё равно дошла.
+
+   Ложного «отправлено» не показываем никогда: если ни один путь
+   не сработал, человек видит запасные контакты. */
+
+function apiBase(){
+  return (window.API_BASE || '').replace(/\/+$/, '');
+}
+
+function wireForm(formId, kind, sentId, failId){
+  const form = $(formId), sent = $(sentId), fail = $(failId);
   const btn  = $('button[type="submit"]', form);
   const btnLabel = btn.querySelector('span');
   const original = btnLabel ? btnLabel.innerHTML : '';
+
+  const restore = ()=>{
+    btn.disabled = false;
+    btn.style.opacity = '';
+    if(btnLabel) btnLabel.innerHTML = original;
+  };
 
   form.addEventListener('submit', async e=>{
     e.preventDefault();
@@ -1763,19 +1779,35 @@ function wireForm(formId, kind, failId){
     }
 
     fail.classList.remove('is-on');
-    const text = VKSend.buildText(form, kind);
+    const base = apiBase();
 
-    // Если сервер настроен — пробуем и его, но человека не задерживаем
-    if(ENDPOINT){
-      fetch(ENDPOINT + '/submit', {method:'POST', body:new FormData(form)}).catch(()=>{});
+    // Сервер не настроен — сразу запасной путь через сообщество
+    if(!base){
+      VKSend.open(VKSend.buildText(form, kind));
+      return;
     }
 
-    VKSend.open(text);
-    if(btnLabel) btnLabel.innerHTML = original;
+    btn.disabled = true;
+    btn.style.opacity = '.55';
+    if(btnLabel) btnLabel.textContent = 'Отправляем…';
+
+    try{
+      const res = await fetch(base + '/submit', {method:'POST', body:new FormData(form)});
+      const data = await res.json().catch(()=>({ok:res.ok}));
+      if(!res.ok || data.ok === false) throw new Error(data.error || ('HTTP ' + res.status));
+
+      form.style.display = 'none';
+      sent.classList.add('is-on');
+    }catch(err){
+      // Сервер не принял — не теряем заявку, отправляем через ВКонтакте
+      restore();
+      VKSend.open(VKSend.buildText(form, kind));
+    }
   });
 }
-wireForm('#form-order',   'order',   '#fail-form-order');
-wireForm('#form-tasting', 'tasting', '#fail-form-tasting');
+wireForm('#form-order',   'order',   '#sent-order',   '#fail-form-order');
+wireForm('#form-tasting', 'tasting', '#sent-tasting', '#fail-form-tasting');
+
 
 
 /* ─────────────────────────────────────────

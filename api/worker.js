@@ -14,6 +14,7 @@
 
 import { CATALOG, priceCart } from './catalog.js';
 import { notifyAll, now } from './notify.js';
+import * as store from './store.js';
 
 const MAX_FILES = 6;
 const MAX_FILE_BYTES = 9 * 1024 * 1024;   // Telegram sendPhoto не берёт больше 10 МБ
@@ -24,6 +25,15 @@ const LABELS = {
   name: 'Имя', phone: 'Телефон', email: 'Почта', time: 'Удобное время',
   more: 'Дополнительно', people: 'Количество человек',
 };
+
+/* У дегустации поле date значит не дату свадьбы, а желаемый день визита.
+   Подписи должны совпадать с теми, что показывает сайт. */
+const LABEL_OVERRIDE = {
+  tasting: { date: 'Желаемая дата' },
+};
+
+const labelFor = (kind, key) =>
+  (LABEL_OVERRIDE[kind] && LABEL_OVERRIDE[kind][key]) || LABELS[key] || key;
 
 const ORDER = {
   order:    ['date', 'place', 'guests', 'filling', 'service', 'name', 'phone', 'channel', 'time', 'more'],
@@ -74,6 +84,26 @@ function orderId() {
 /* ═══════════════════════════════════════════
    POST /submit — формы сайта
    ═══════════════════════════════════════════ */
+/**
+ * GET /pending  — заявки, которые не ушли в Telegram
+ * GET /requests — все заявки за последние полгода
+ *
+ * Закрыто ключом ADMIN_KEY: без него отдаём 404, чтобы посторонний
+ * не мог перебором найти чужие телефоны.
+ * Вызов: /pending?key=ВАШ_КЛЮЧ
+ */
+async function handleList(request, env, headers, onlyPending) {
+  const key = new URL(request.url).searchParams.get('key') || '';
+  if (!env.ADMIN_KEY || key !== env.ADMIN_KEY) {
+    return new Response('Not found', { status: 404, headers });
+  }
+  if (!store.ready(env)) {
+    return json({ ok: false, error: 'Хранилище не подключено: нет привязки REQUESTS' }, 200, headers);
+  }
+  const items = onlyPending ? await store.listPending(env, 100) : await store.listAll(env, 200);
+  return json({ ok: true, count: items.length, items }, 200, headers);
+}
+
 async function handleSubmit(request, env, headers) {
   let form;
   try {
@@ -92,7 +122,7 @@ async function handleSubmit(request, env, headers) {
   for (const key of ORDER[kind]) {
     const v = form.get(key);
     if (typeof v !== 'string' || !v.trim()) continue;
-    rows.push([LABELS[key] || key, humanDate(key, v.trim()).slice(0, 2000)]);
+    rows.push([labelFor(kind, key), humanDate(key, v.trim()).slice(0, 2000)]);
   }
   if (kind === 'order' && form.get('decor_later')) {
     rows.push(['Декор', 'референса нет — обсудить индивидуально']);
@@ -103,15 +133,85 @@ async function handleSubmit(request, env, headers) {
     .slice(0, MAX_FILES);
   if (files.length) rows.push(['Референсы', `${files.length} шт. — ниже`]);
 
-  const result = await notifyAll(env, {
+  const letter = {
     title: TITLES[kind], rows, footer: `Сайт «Торт по любви» · ${now()}`,
+  };
+
+  /* Сначала в хранилище, потом в Telegram.
+     Порядок важен: если отправка упадёт или воркер оборвётся,
+     имя и телефон клиента уже записаны и заявка не потеряется. */
+  const id = store.newId();
+  const saved = await store.save(env, id, {
+    kind,
+    title: letter.title,
+    rows,
+    text: plainOf(letter),
+    html: htmlOf(letter),
   }, files);
 
-  // Хоть один канал доставил — заявка принята
-  if (!result.delivered.length && result.failed.length) {
-    return json({ ok: false, error: result.errors[0] || 'Не удалось доставить заявку' }, 502, headers);
+  const result = await notifyAll(env, letter, files);
+  await store.markResult(env, id, result.delivered, result.errors);
+
+  // Заодно пробуем добить то, что не ушло в прошлые разы
+  const resent = await retryPending(env);
+
+  if (result.delivered.length) {
+    return json({ ok: true, id, delivered: result.delivered, resent }, 200, headers);
   }
-  return json({ ok: true, delivered: result.delivered }, 200, headers);
+
+  /* Ни один канал не принял. Если заявка записана — для клиента это
+     всё равно успех: данные у нас, владелец увидит их в /pending. */
+  if (saved) {
+    return json({
+      ok: true, id, delivered: [], saved: true,
+      note: 'Заявка сохранена, уведомление отправим позже',
+    }, 200, headers);
+  }
+
+  // Не доставлено и не сохранено — честно говорим о провале,
+  // сайт покажет запасной путь через сообщество ВКонтакте.
+  return json({ ok: false, error: result.errors[0] || 'Не удалось доставить заявку' }, 502, headers);
+}
+
+/** Текстовая версия письма — её же кладём в хранилище. */
+function plainOf(letter) {
+  return [letter.title, '']
+    .concat(letter.rows.map(([k, v]) => `${k}: ${v}`))
+    .concat(letter.footer ? ['', letter.footer] : [])
+    .join('\n');
+}
+
+function htmlOf(letter) {
+  const esc = x => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return [`<b>${esc(letter.title)}</b>`, '']
+    .concat(letter.rows.map(([k, v]) => `<b>${esc(k)}:</b> ${esc(v)}`))
+    .concat(letter.footer ? ['', `<i>${esc(letter.footer)}</i>`] : [])
+    .join('\n');
+}
+
+/**
+ * Досылает заявки, которые раньше не ушли.
+ * Вызывается на каждой новой заявке — отдельного планировщика не нужно.
+ */
+async function retryPending(env) {
+  if (!store.ready(env)) return 0;
+  const pending = await store.listPending(env, 5);
+  let done = 0;
+  for (const rec of pending) {
+    const letter = {
+      title: rec.title,
+      rows: rec.rows || [],
+      footer: `Повторная отправка · заявка от ${rec.created}`,
+    };
+    try {
+      const r = await notifyAll(env, letter, store.photosToFiles(rec));
+      await store.markResult(env, rec.id, r.delivered, r.errors);
+      if (r.delivered.length) done += 1;
+    } catch {
+      /* следующая попытка будет со следующей заявкой */
+    }
+  }
+  return done;
 }
 
 /* ═══════════════════════════════════════════
@@ -197,7 +297,7 @@ async function handleCreatePayment(request, env, headers) {
   for (const key of ORDER.checkout) {
     const v = c[key];
     if (typeof v !== 'string' || !v.trim()) continue;
-    rows.push([LABELS[key] || key, humanDate(key, v.trim()).slice(0, 2000)]);
+    rows.push([labelFor('checkout', key), humanDate(key, v.trim()).slice(0, 2000)]);
   }
   rows.push(['Состав', priced.lines.map(l => `${l.name} × ${l.qty} — ${money(l.sum)}`).join('; ')]);
   rows.push(['Сумма', money(amount)]);
@@ -321,6 +421,14 @@ export default {
     // Цены, по которым считает сервер — чтобы сверить с сайтом
     if (path === '/catalog' && request.method === 'GET') {
       return json({ ok: true, catalog: CATALOG }, 200, headers);
+    }
+
+    // Заявки: недоставленные и все. Только для владельца, по ключу.
+    if (path === '/pending' && request.method === 'GET') {
+      return handleList(request, env, headers, true);
+    }
+    if (path === '/requests' && request.method === 'GET') {
+      return handleList(request, env, headers, false);
     }
 
     // Вебхук кассы приходит с серверов ЮKassa, Origin у него нет

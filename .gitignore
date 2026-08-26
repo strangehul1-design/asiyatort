@@ -3,3 +3,7 @@ Thumbs.db
 *.log
 .vscode/
 .idea/
+
+# служебное от wrangler
+api/.wrangler/
+api/wrangler.dev.toml

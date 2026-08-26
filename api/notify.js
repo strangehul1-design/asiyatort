@@ -26,7 +26,11 @@ const escHtml = s => String(s)
 async function sendTelegram(env, text, files) {
   if (!env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_CHAT_ID) return { skipped: 'telegram' };
 
-  const api = m => `https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/${m}`;
+  /* Адрес API вынесен в переменную, чтобы сквозной тест мог направить
+     запросы на локальную заглушку. В бою переменная не задана и
+     используется настоящий api.telegram.org. */
+  const host = (env.TELEGRAM_API_BASE || 'https://api.telegram.org').replace(/\/+$/, '');
+  const api = m => `${host}/bot${env.TELEGRAM_BOT_TOKEN}/${m}`;
 
   const msg = new FormData();
   msg.append('chat_id', env.TELEGRAM_CHAT_ID);
